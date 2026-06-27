@@ -40,3 +40,13 @@ kubectl apply -f manifests/deployment.yaml
 kubectl get pods
 kubectl logs -f <pod-name>
 ```
+
+## Access in Kubernetes (Port Forward)
+```bash
+kubectl port-forward deployment/todo-app-dep 3000:3000
+```
+After port-forwarding, open:
+```bash
+http://localhost:3000
+```
+
