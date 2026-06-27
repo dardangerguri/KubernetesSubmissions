@@ -34,3 +34,15 @@ docker run log-output:1.0
 kubectl apply -f manifests/deployment.yaml
 kubectl logs -f <pod-name>
 ```
+
+## Access in Kubernetes (Ingress)
+The application is exposed using a Kubernetes Ingress.
+
+After deploying to the cluster, it can be accessed at:
+```bash
+http://localhost:8081
+```
+
+Endpoints:
+- `/` simple HTML page
+- `/status` returns JSON with timestamp and unique ID
