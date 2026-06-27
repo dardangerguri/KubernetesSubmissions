@@ -41,25 +41,18 @@ kubectl get pods
 kubectl logs -f <pod-name>
 ```
 
-## Access in Kubernetes (Port Forward)
+## Run in Kubernetes
 ```bash
-kubectl port-forward deployment/todo-app-dep 3000:3000
-```
-After port-forwarding, open:
-```bash
-http://localhost:3000
-```
-
-## Run in Kubernetes (NodePort Service)
-```bash
-kubectl apply -f manifests/deployment.yaml
-kubectl apply -f manifests/service.yaml
+kubectl apply -f manifests/
 kubectl get pods
 kubectl get svc
+kubectl get ingress
 ```
-The application is exposed using a NodePort Service:
-```bash
-http://localhost:8082
-```
-8082 is mapped to the NodePort 30080 using k3d cluster configuration
 
+## Access in Kubernetes (Ingress)
+The application is exposed using a Kubernetes Ingress.
+
+After deploying to the cluster, it can be accessed at:
+```bash
+http://localhost:8081
+```
