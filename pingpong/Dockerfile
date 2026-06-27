@@ -2,11 +2,13 @@ FROM golang:1.22
 
 WORKDIR /app
 
-COPY go.mod ./
+COPY pingpong/go.mod ./
 RUN go mod download
 
 COPY . .
 
-RUN go build -o pingpong_app
+WORKDIR /app/pingpong
 
-CMD ["./pingpong_app"]
+RUN go build -o main .
+
+CMD ["./main"]

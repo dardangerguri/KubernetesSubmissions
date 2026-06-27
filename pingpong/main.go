@@ -4,9 +4,32 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strconv"
+	"strings"
 )
 
-var counter = 0
+const filePath = "/shared/pongs.txt"
+
+func getCounter() int {
+	data, err := os.ReadFile(filePath)
+	if err != nil {
+		fmt.Printf("Debug - ReadFile Error: %v\n", err)
+		return 0
+	}
+	count, err := strconv.Atoi(strings.TrimSpace(string(data)))
+	if err != nil {
+		fmt.Printf("Debug - Atoi Parse Error: %v\n", err)
+		return 0
+	}
+	return count
+}
+
+func saveCounter(count int) {
+	err := os.WriteFile(filePath, []byte(strconv.Itoa(count)), 0644)
+	if err != nil {
+		fmt.Printf("Error writing to file: %v\n", err)
+	}
+}
 
 func main() {
 	port := os.Getenv("PORT")
@@ -17,7 +40,10 @@ func main() {
 	http.HandleFunc("/pingpong", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 
+		counter := getCounter()
 		counter++
+		saveCounter(counter)
+
 		fmt.Fprintf(w, "pong %d", counter)
 	})
 

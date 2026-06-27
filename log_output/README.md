@@ -4,14 +4,14 @@ It is a multi-container Go application for the DevOps with Kubernetes course. Sp
 
 ## What it does
 
-The application is split into two distinct components that communicate via a shared volume (`emptyDir`):
-1. **Writer**: Generates a random UUID on startup and appends a line with a timestamp and the UUID every 5 seconds to a shared file.
-2. **Reader**: An HTTP server that reads the shared log file and displays its contents to the user.
+The application consists of two distinct components that communicate and share state via a Persistent Volume Claim (`shared-pingpong-pvc`):
+1. **Writer**: Generates a random UUID on startup and appends a line with a timestamp and the UUID every 5 seconds to a shared file (`/shared/log.txt`).
+2. **Reader**: An HTTP server that reads the local log file *and* aggregates data from the `pingpong` application's counter (`/shared/pongs.txt`), outputting the unified state to the user over port `8080`.
 
 ## Example Output
 ```bash
-2020-03-30T12:15:17.705Z: 8523ecb1-c716-4cb6-a044-b9e83bb98e43
-2020-03-30T12:15:22.705Z: 8523ecb1-c716-4cb6-a044-b9e83bb98e43
+2026-06-27T22:46:12.733096425Z: f35da301-bc6c-4eb6-b813-3fa6870a775e
+2026-06-27T22:46:17.738108845Z: f35da301-bc6c-4eb6-b813-3fa6870a775e.Ping / Pongs: 3
 ```
 
 ## Build and Push to Cluster
@@ -32,10 +32,13 @@ k3d image import log-writer:1.0 log-reader:1.0 -c k3s-default
 kubectl apply -f manifests/
 ```
 
-## Access in Kubernetes (Ingress)
+## Access in Kubernetes (Port-Forward)
 The application is exposed using a Kubernetes Ingress.
 
-After deploying to the cluster, it can be accessed at:
 ```bash
-http://localhost:8081
+kubectl port-forward deployment/log-output-dep 8081:8080
+```
+Now you can test it:
+```bash
+curl http://localhost:8081/
 ```
