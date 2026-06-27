@@ -1,13 +1,12 @@
 # Log Output App
 
-It is a simple Go application for the DevOps with Kubernetes course.
-
+It is a multi-container Go application for the DevOps with Kubernetes course. Split into decoupled components running inside a single Pod.
 
 ## What it does
 
-- Generates a random UUID on startup
-- Stores it in memory
-- Prints it every 5 seconds with a timestamp
+The application is split into two distinct components that communicate via a shared volume (`emptyDir`):
+1. **Writer**: Generates a random UUID on startup and appends a line with a timestamp and the UUID every 5 seconds to a shared file.
+2. **Reader**: An HTTP server that reads the shared log file and displays its contents to the user.
 
 ## Example Output
 ```bash
@@ -15,24 +14,22 @@ It is a simple Go application for the DevOps with Kubernetes course.
 2020-03-30T12:15:22.705Z: 8523ecb1-c716-4cb6-a044-b9e83bb98e43
 ```
 
-## Run Locally
+## Build and Push to Cluster
 
+#### Build Docker images
 ```bash
-go run main.go
+docker build -t log-writer:1.0 -f writer/Dockerfile .
+docker build -t log-reader:1.0 -f reader/Dockerfile .
 ```
-
-## Run with Docker
-
+#### Import images into the k3d cluster nodes
 ```bash
-docker build -t log-output:1.0 .
-docker run log-output:1.0
+k3d image import log-writer:1.0 log-reader:1.0 -c k3s-default
 ```
 
 ## Run in Kubernetes
 
 ```bash
-kubectl apply -f manifests/deployment.yaml
-kubectl logs -f <pod-name>
+kubectl apply -f manifests/
 ```
 
 ## Access in Kubernetes (Ingress)
@@ -42,7 +39,3 @@ After deploying to the cluster, it can be accessed at:
 ```bash
 http://localhost:8081
 ```
-
-Endpoints:
-- `/` simple HTML page
-- `/status` returns JSON with timestamp and unique ID

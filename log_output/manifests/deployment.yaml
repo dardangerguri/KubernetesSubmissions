@@ -12,9 +12,23 @@ spec:
       labels:
         app: log-output
     spec:
+      volumes:
+        - name: shared-log-volume
+          emptyDir: {}
+
       containers:
-        - name: log-output
-          image: log-output:1.0
+        - name: log-writer
+          image: log-writer:1.0
+          imagePullPolicy: IfNotPresent
+          volumeMounts:
+            - name: shared-log-volume
+              mountPath: /shared
+
+        - name: log-reader
+          image: log-reader:1.0
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
-          imagePullPolicy: IfNotPresent
+          volumeMounts:
+            - name: shared-log-volume
+              mountPath: /shared
