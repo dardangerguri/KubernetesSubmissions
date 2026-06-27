@@ -50,3 +50,16 @@ After port-forwarding, open:
 http://localhost:3000
 ```
 
+## Run in Kubernetes (NodePort Service)
+```bash
+kubectl apply -f manifests/deployment.yaml
+kubectl apply -f manifests/service.yaml
+kubectl get pods
+kubectl get svc
+```
+The application is exposed using a NodePort Service:
+```bash
+http://localhost:8082
+```
+8082 is mapped to the NodePort 30080 using k3d cluster configuration
+
