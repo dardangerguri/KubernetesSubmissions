@@ -1,19 +1,13 @@
 # Todo App
 
-It is a simple web server for the DevOps with Kubernetes course.
+It is a simple web server for the DevOps with Kubernetes course that displays an hourly cached picture along with your tasks.
 
 
 ## What it does
 
 - Starts a web server on a configurable port
-- Outputs "Server started in port NNNN" on startup
-- Responds with "Todo App is running!" at the root endpoint
-
-## Example Output
-
-```bash
-Server started in port 3000
-```
+- Fetches a random 1200px image from Lorem Picsum and caches it locally.
+- **Persistent Cache:** Keeps the image identical for 10 minutes. If the container crashes or restarts, it reuses the cached image from the persistent volume instead of hitting the external API again.
 
 ## Run Locally
 
@@ -23,36 +17,26 @@ go run main.go
 ## or with Custom Port
 
 ```bash
-PORT=3000 go run main.go
+PORT=8080 go run main.go
 ```
 
 ## Run with Docker
 
 ```bash
 docker build -t todo-app:1.0 .
-docker run -e PORT=3000 todo-app:1.0
+docker run -e PORT=8080 todo-app:1.0
 ```
 
 ## Run in Kubernetes
 
 ```bash
-kubectl apply -f manifests/deployment.yaml
-kubectl get pods
-kubectl logs -f <pod-name>
-```
-
-## Run in Kubernetes
-```bash
+kubectl apply -f storage/
+docker build -t todo-app:1.0 .
+k3d image import todo-app:1.0 -c k3s-default
 kubectl apply -f manifests/
-kubectl get pods
-kubectl get svc
-kubectl get ingress
 ```
 
-## Access in Kubernetes (Ingress)
-The application is exposed using a Kubernetes Ingress.
-
-After deploying to the cluster, it can be accessed at:
+## Access
 ```bash
 http://localhost:8081
 ```

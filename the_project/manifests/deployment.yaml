@@ -18,4 +18,11 @@ spec:
           imagePullPolicy: IfNotPresent
           env:
             - name: PORT
-              value: "3000"
+              value: "8080"
+          volumeMounts:
+            - name: shared-storage
+              mountPath: /shared
+      volumes:
+        - name: shared-storage
+          persistentVolumeClaim:
+            claimName: shared-todo-pvc
