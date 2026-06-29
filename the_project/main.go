@@ -58,13 +58,52 @@ func main() {
 					font-size: 2.5rem;
 					margin-bottom: 20px;
 				}
+				h2 {
+					font-size: 1.8rem;
+					margin-top: 30px;
+					margin-bottom: 20px;
+				}
 				img {
 					max-width: 400px;
 					border-radius: 12px;
 					margin-bottom: 20px;
 				}
-				p {
-					color: #555;
+				.form-container {
+					margin-bottom: 30px;
+				}
+				input[type="text"] {
+					width: 400px;
+					padding: 12px;
+					font-size: 1rem;
+					border: 2px solid #28a745;
+					border-radius: 6px;
+					outline:none;
+				}
+				button {
+					padding: 12px 24px;
+					font-size: 1rem;
+					background-color: #28a745;
+					color: white;
+					border: none;
+					border-radius: 6px;
+					cursor: pointer;
+					margin-left: 10px;
+				}
+				button:hover {
+					background-color: #218838;
+				}
+				.todo-list {
+					max-width: 600px;
+					margin: 0 auto;
+					text-align: left;
+				}
+				.todo-item {
+					background-color: #f8f9fa;
+					padding: 15px;
+					margin-bottom: 10px;
+					border-left: 5px solid #28a745;
+					border-radius: 4px;
+					font-size: 1.1rem;
 				}
 			</style>
 		</head>
@@ -73,7 +112,18 @@ func main() {
 			<div>
 				<img src="/image" alt="Todo Image">
 			</div>
-			<p>DevOps with Kubernetes</p>
+
+			<div class="form-container">
+				<input type="text" placeholder="Enter a new todo (max 140 characters)" maxlength="140">
+				<button type="button">Send</button>
+			</div>
+
+			<h2>Todos</h2>
+			<div class="todo-list">
+				<div class="todo-item">Learn Kubernetes basics</div>
+				<div class="todo-item">Deploy application to cluster</div>
+				<div class="todo-item">Configure persistent volumes</div>
+			</div>
 		</body>
 		</html>`
 

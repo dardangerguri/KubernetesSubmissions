@@ -8,6 +8,7 @@ It is a simple web server for the DevOps with Kubernetes course that displays an
 - Starts a web server on a configurable port
 - Fetches a random 1200px image from Lorem Picsum and caches it locally.
 - **Persistent Cache:** Keeps the image identical for 10 minutes. If the container crashes or restarts, it reuses the cached image from the persistent volume instead of hitting the external API again.
+- **Todo Interface:** Features a user input field with a strict 140-character maximum limit, a submit action button, and a pre-seeded task list.
 
 ## Run Locally
 
