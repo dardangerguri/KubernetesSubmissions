@@ -18,10 +18,3 @@ spec:
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
-          volumeMounts:
-            - name: shared-storage
-              mountPath: /shared
-      volumes:
-        - name: shared-storage
-          persistentVolumeClaim:
-            claimName: shared-pingpong-pvc

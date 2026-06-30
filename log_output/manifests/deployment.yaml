@@ -13,16 +13,15 @@ spec:
         app: log-output
     spec:
       volumes:
-        - name: shared-storage
-          persistentVolumeClaim:
-            claimName: shared-pingpong-pvc
+        - name: log-storage
+          emptyDir: {}
 
       containers:
         - name: log-writer
           image: log-writer:1.0
           imagePullPolicy: IfNotPresent
           volumeMounts:
-            - name: shared-storage
+            - name: log-storage
               mountPath: /shared
 
         - name: log-reader
@@ -31,5 +30,5 @@ spec:
           ports:
             - containerPort: 8080
           volumeMounts:
-            - name: shared-storage
+            - name: log-storage
               mountPath: /shared

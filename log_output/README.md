@@ -4,9 +4,9 @@ It is a multi-container Go application for the DevOps with Kubernetes course. Sp
 
 ## What it does
 
-The application consists of two distinct components that communicate and share state via a Persistent Volume Claim (`shared-pingpong-pvc`):
-1. **Writer**: Generates a random UUID on startup and appends a line with a timestamp and the UUID every 5 seconds to a shared file (`/shared/log.txt`).
-2. **Reader**: An HTTP server that reads the local log file *and* aggregates data from the `pingpong` application's counter (`/shared/pongs.txt`), outputting the unified state to the user over port `8080`.
+The application consists of two distinct components that run concurrently in a single pod:
+1. **Writer**: Generates a random UUID on startup and appends a line with a timestamp and the UUID every 5 seconds to an internal Pod volume file (`/shared/log.txt`).
+2. **Reader**: An HTTP server that reads the local log file, makes an **internal HTTP GET request** to the `pingpong-app-svc` cluster service to fetch the live pong counter, aggregates them, and outputs the unified state to the user over port `8080`.
 
 ## Example Output
 ```bash
@@ -32,12 +32,6 @@ k3d image import log-writer:1.0 log-reader:1.0 -c k3s-default
 kubectl apply -f manifests/
 ```
 
-## Access in Kubernetes (Port-Forward)
-The application is exposed using a Kubernetes Ingress.
-
-```bash
-kubectl port-forward deployment/log-output-dep 8081:8080
-```
 Now you can test it:
 ```bash
 curl http://localhost:8081/

@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-const filePath = "/shared/pongs.txt"
+const filePath = "/tmp/pongs.txt"
 
 func getCounter() int {
 	data, err := os.ReadFile(filePath)
@@ -25,6 +25,7 @@ func getCounter() int {
 }
 
 func saveCounter(count int) {
+	_ = os.MkdirAll("/tmp", 0755)
 	err := os.WriteFile(filePath, []byte(strconv.Itoa(count)), 0644)
 	if err != nil {
 		fmt.Printf("Error writing to file: %v\n", err)
@@ -45,6 +46,11 @@ func main() {
 		saveCounter(counter)
 
 		fmt.Fprintf(w, "pong %d", counter)
+	})
+
+	http.HandleFunc("/pings", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+			fmt.Fprintf(w, "%d", getCounter())
 	})
 
 	fmt.Printf("Ping-pong server started in port %s\n", port)
