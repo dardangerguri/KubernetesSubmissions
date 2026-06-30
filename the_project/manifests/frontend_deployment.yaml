@@ -22,6 +22,12 @@ spec:
           volumeMounts:
             - name: shared-storage
               mountPath: /shared
+          env:
+            - name: BACKEND_URL
+              value: "http://todo-backend-svc/todos"
+            - name: IMAGE_URL
+              value: "https://picsum.photos/1200"
+
       volumes:
         - name: shared-storage
           persistentVolumeClaim:

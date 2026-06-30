@@ -11,7 +11,22 @@ import (
 )
 
 const imagePath = "/shared/todo_image.jpg"
-const backendUrl = "http://todo-backend-svc:80/todos"
+
+func getBackendURL() string {
+	url := os.Getenv("BACKEND_URL")
+	if url == "" {
+		return "http://todo-backend-svc/todos"
+	}
+	return url
+}
+
+func getImageURL() string {
+	url := os.Getenv("IMAGE_URL")
+	if url == "" {
+		return "https://picsum.photos/1200"
+	}
+	return url
+}
 
 type Todo struct {
 	Text string `json:"text"`
@@ -26,7 +41,7 @@ func fetchAndCacheImage() error {
 	}
 
 	fmt.Println("Fetching and caching image...")
-	resp, err := http.Get("https://picsum.photos/1200")
+	resp, err := http.Get(getImageURL())
 	if err != nil {
 		return err
 	}
@@ -42,7 +57,7 @@ func fetchAndCacheImage() error {
 	return err
 }
 
-func getTodosFromBackend() []Todo {
+func getTodosFromBackend(backendUrl string) []Todo {
 	var list []Todo
 	resp, err := http.Get(backendUrl)
 	if err != nil {
@@ -55,6 +70,8 @@ func getTodosFromBackend() []Todo {
 }
 
 func main() {
+	backendUrl := getBackendURL()
+
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
@@ -63,7 +80,7 @@ func main() {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
-		currentTodos := getTodosFromBackend()
+		currentTodos := getTodosFromBackend(backendUrl)
 		var todoItemsHTML string
 		for _, todo := range currentTodos {
 			todoItemsHTML += fmt.Sprintf(`<div class="todo-item">%s</div>`, todo.Text)
@@ -182,7 +199,7 @@ func main() {
 		http.ServeFile(w, r, imagePath)
 	})
 
-	fmt.Printf("Froentend erver started in port %s\n", port)
+	fmt.Printf("Frontend server started in port %s\n", port)
 	if err := http.ListenAndServe(":"+port, nil); err !=nil {
 		fmt.Printf("Error starting frontend: %v\n", err)
 	}
