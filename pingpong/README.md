@@ -25,3 +25,9 @@ Now you can test it:
 ```bash
 curl http://localhost:8082/pingpong
 ```
+
+## Namespace Separation
+This application is deployed inside the isolated `exercises` namespace.
+```bash
+kubectl get all -n exercises
+```
