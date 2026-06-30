@@ -1,6 +1,8 @@
 package main
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -9,6 +11,11 @@ import (
 )
 
 const imagePath = "/shared/todo_image.jpg"
+const backendUrl = "http://todo-backend-svc:80/todos"
+
+type Todo struct {
+	Text string `json:"text"`
+}
 
 func fetchAndCacheImage() error {
 	fileInfo, err := os.Stat(imagePath)
@@ -35,6 +42,18 @@ func fetchAndCacheImage() error {
 	return err
 }
 
+func getTodosFromBackend() []Todo {
+	var list []Todo
+	resp, err := http.Get(backendUrl)
+	if err != nil {
+		fmt.Printf("Error pulling from backend: %v\n", err)
+		return []Todo{{Text: "Backend unreachable"}}
+	}
+	defer resp.Body.Close()
+	json.NewDecoder(resp.Body).Decode(&list)
+	return list
+}
+
 func main() {
 	port := os.Getenv("PORT")
 	if port == "" {
@@ -44,7 +63,13 @@ func main() {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
-		html := `<!DOCTYPE html>
+		currentTodos := getTodosFromBackend()
+		var todoItemsHTML string
+		for _, todo := range currentTodos {
+			todoItemsHTML += fmt.Sprintf(`<div class="todo-item">%s</div>`, todo.Text)
+		}
+
+		html := fmt.Sprintf(`<!DOCTYPE html>
 		<html>
 		<head>
 			<title>Todo App</title>
@@ -114,20 +139,39 @@ func main() {
 			</div>
 
 			<div class="form-container">
-				<input type="text" placeholder="Enter a new todo (max 140 characters)" maxlength="140">
-				<button type="button">Send</button>
+				<form action="/create" method="POST">
+					<input type="text" name="todo" placeholder="Enter a new todo (max 140 characters)" maxlength="140" required>
+					<button type="submit">Send</button>
+				</form>
 			</div>
 
 			<h2>Todos</h2>
 			<div class="todo-list">
-				<div class="todo-item">Learn Kubernetes basics</div>
-				<div class="todo-item">Deploy application to cluster</div>
-				<div class="todo-item">Configure persistent volumes</div>
+				%s
 			</div>
 		</body>
-		</html>`
+		</html>`, todoItemsHTML)
 
 		fmt.Fprint(w, html)
+	})
+
+	http.HandleFunc("/create", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			http.Redirect(w, r, "/", http.StatusSeeOther)
+			return
+		}
+		todoText := r.FormValue("todo")
+		if todoText != "" {
+			todoObj := Todo{Text: todoText}
+			jsonData, _ := json.Marshal(todoObj)
+
+			_, err := http.Post(backendUrl, "application/json", bytes.NewBuffer(jsonData))
+			if err != nil {
+				fmt.Printf("Error creating todo on backend: %v\n", err)
+			}
+		}
+
+		http.Redirect(w, r, "/", http.StatusSeeOther)
 	})
 
 	http.HandleFunc("/image", func(w http.ResponseWriter, r *http.Request) {
@@ -138,8 +182,8 @@ func main() {
 		http.ServeFile(w, r, imagePath)
 	})
 
-	fmt.Printf("Server started in port %s\n", port)
+	fmt.Printf("Froentend erver started in port %s\n", port)
 	if err := http.ListenAndServe(":"+port, nil); err !=nil {
-		fmt.Printf("Error starting server: %v\n", err)
+		fmt.Printf("Error starting frontend: %v\n", err)
 	}
 }

@@ -16,9 +16,8 @@ spec:
         - name: todo-app
           image: todo-app:1.0
           imagePullPolicy: IfNotPresent
-          env:
-            - name: PORT
-              value: "8080"
+          ports:
+            - containerPort: 8080
           volumeMounts:
             - name: shared-storage
               mountPath: /shared
