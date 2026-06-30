@@ -16,6 +16,9 @@ spec:
       volumes:
         - name: log-storage
           emptyDir: {}
+        - name: config-volume
+          configMap:
+            name: log-output-config
 
       containers:
         - name: log-writer
@@ -30,6 +33,14 @@ spec:
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
+          env:
+            - name: MESSAGE
+              valueFrom:
+                configMapKeyRef:
+                  name: log-output-config
+                  key: MESSAGE
           volumeMounts:
             - name: log-storage
               mountPath: /shared
+            - name: config-volume
+              mountPath: /config

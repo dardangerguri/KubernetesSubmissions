@@ -16,8 +16,16 @@ func main() {
 			return
 		}
 
+		messageEnv := os.Getenv("MESSAGE")
+
+		configFileDir, err := os.ReadFile("/config/information.txt")
+		fileContent := "file not found"
+		if err == nil {
+			fileContent = strings.TrimSpace(string(configFileDir))
+		}
+
 		pongCount := "0"
-		resp, err := http.Get("http://pingpong-app-svc/pings")
+		resp, err := http.Get("http://pingpong-app-svc.exercises.svc.cluster.local/pings")
 		if err == nil {
 			defer resp.Body.Close()
 			body, err := io.ReadAll(resp.Body)
@@ -28,7 +36,8 @@ func main() {
 			fmt.Printf("Error reaching pingpong service: %v\n", err)
 		}
 
-		output := fmt.Sprintf("%s.Ping / Pongs: %s\n", strings.TrimSpace(string(logData)), pongCount)
+		output := fmt.Sprintf("file content: %s\nenv variable: MESSAGE=%s\n%s.Ping / Pongs: %s\n",
+			fileContent, messageEnv, strings.TrimSpace(string(logData)), pongCount)
 
 		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 		fmt.Fprint(w, output)
