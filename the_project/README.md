@@ -36,9 +36,15 @@ http://localhost:8081
 ```
 or, use port-forwarding directly to the frontend service:
 ```bash
-kubectl port-forward service/todo-app-svc 8080:80
+kubectl port-forward service/todo-app-svc 8080:80 -n project
 ````
 then got to
 ```bash
 http://localhost:8080
+```
+
+## Namespace Separation
+This application is deployed inside the isolated `project` namespace.
+```bash
+kubectl get all -n project
 ```
