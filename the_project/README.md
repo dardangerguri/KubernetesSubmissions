@@ -12,6 +12,7 @@ It is a simple web server for the DevOps with Kubernetes course that displays an
 - **Secure Configurations:** Uses Kubernetes ConfigMaps and Secrets to securely manage database credentials (host, port, user, database name, and password) without hardcoding them in the manifest files.
 - **Persistent Cache:** Keeps the image identical for 10 minutes. If the container crashes or restarts, it reuses the cached image from the persistent volume instead of hitting the external API again.
 - **Todo Interface:** Features a user input field with a strict 140-character maximum limit, a submit action button, and renders tasks dynamically from the backend service.
+- **Automated Wikipedia Bot (`wikipedia-todo-job`):** A Kubernetes CronJob that triggers once every hour. It automatically fetches a random Wikipedia article URL and issues a `POST` request to the backend to add a "Read <URL>" reminder task.
 
 ## Run with Docker
 
@@ -44,6 +45,13 @@ kubectl port-forward service/todo-app-svc 8080:80 -n project
 then got to
 ```bash
 http://localhost:8080
+```
+
+## Testing the Bot
+```bash
+kubectl create job --from=cronjob/wikipedia-todo-job test-wikipedia-job -n project
+kubectl logs -l job-name=test-wikipedia-job -n project
+kubectl delete job test-wikipedia-job -n project
 ```
 
 ## Namespace Separation
