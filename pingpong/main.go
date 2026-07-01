@@ -1,34 +1,68 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
 	"net/http"
 	"os"
-	"strconv"
-	"strings"
+
+	_ "github.com/lib/pq"
 )
 
-const filePath = "/tmp/pongs.txt"
+var db *sql.DB
+
+func initDB() {
+	connStr := "host=postgres-svc port=5432 user=postgres password=postgres dbname=postgres sslmode=disable"
+
+	var err error
+	db, err = sql.Open("postgres", connStr)
+	if err != nil {
+		panic(err)
+	}
+
+	err = db.Ping()
+	if err != nil {
+		panic(err)
+	}
+
+	_, err = db.Exec(`
+		CREATE TABLE IF NOT EXISTS counter (
+			id INT PRIMARY KEY,
+			value INT NOT NULL
+		)
+	`)
+	if err != nil {
+		panic(err)
+	}
+
+	_, err = db.Exec(`
+		INSERT INTO counter (id, value)
+		VALUES (1, 0)
+		ON CONFLICT (id) DO NOTHING
+	`)
+	if err != nil {
+		panic(err)
+	}
+}
 
 func getCounter() int {
-	data, err := os.ReadFile(filePath)
+	var value int
+	err := db.QueryRow(`
+		SELECT value FROM counter WHERE id = 1
+	`).Scan(&value)
 	if err != nil {
-		fmt.Printf("Debug - ReadFile Error: %v\n", err)
+		fmt.Printf("DB read error: %v\n", err)
 		return 0
 	}
-	count, err := strconv.Atoi(strings.TrimSpace(string(data)))
-	if err != nil {
-		fmt.Printf("Debug - Atoi Parse Error: %v\n", err)
-		return 0
-	}
-	return count
+	return value
 }
 
 func saveCounter(count int) {
-	_ = os.MkdirAll("/tmp", 0755)
-	err := os.WriteFile(filePath, []byte(strconv.Itoa(count)), 0644)
+	_, err := db.Exec(`
+		UPDATE counter SET value = $1 WHERE id = 1
+	`, count)
 	if err != nil {
-		fmt.Printf("Error writing to file: %v\n", err)
+		fmt.Printf("DB write error: %v\n", err)
 	}
 }
 
@@ -37,6 +71,8 @@ func main() {
 	if port == "" {
 		port = "8080"
 	}
+
+	initDB()
 
 	http.HandleFunc("/pingpong", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/plain; charset=utf-8")

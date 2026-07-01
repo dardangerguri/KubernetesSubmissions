@@ -1,12 +1,14 @@
 # Pingpong App
 
-It is a simple Go application that tracks request counts and exposes them both publicly to users and internally to other cluster applications over HTTP.
+It is a simple Go service running in Kubernetes. It tracks the number of requests and stores the counter in a PostgreSQL database.
+It is deployed in the `exercises` namespace and uses a StatefulSet-based PostgreSQL database for persistent storage.
 
 
 ## Endpoint
 
-- **`/pingpong`** (Public via Ingress): Increments and returns `pong N` where N increases on each request.
-- **`/pings`** (Internal Cluster IP): Returns just the raw count integer `N` for the `log-output` service to consume.
+- **`/pingpong`** (Public via Ingress): Increments a counter stored in PostgreSQL and returns `pong N`.
+- **`/pings`** (Internal Cluster IP): Returns the current counter value stored in PostgreSQL.
+
 
 ## Run with Docker
 
@@ -31,3 +33,8 @@ This application is deployed inside the isolated `exercises` namespace.
 ```bash
 kubectl get all -n exercises
 ```
+
+## Postgres
+- PostgreSQL is deployed as a StatefulSet with persistent storage.
+- The Pingpong service automatically creates the required database table on startup.
+- The counter persists even if the Pingpong pod restarts.
