@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: pingpong-app
-          image: pingpong-app:1.0
-          imagePullPolicy: IfNotPresent
+          image: dardangerguri/pingpong-app:1.0
+          imagePullPolicy: Always
           ports:
             - containerPort: 8080

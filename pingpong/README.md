@@ -10,22 +10,35 @@ It is deployed in the `exercises` namespace and uses a StatefulSet-based Postgre
 - **`/pings`** (Internal Cluster IP): Returns the current counter value stored in PostgreSQL.
 
 
-## Run with Docker
+## Run with Docker Locally
 
 ```bash
 docker build -t pingpong-app:1.0 -f pingpong/Dockerfile .
 docker run -p 8080:8080 pingpong-app:1.0
 ```
 
-## Run in Kubernetes
+## Cloud Deployment (GKE)
+The application is fully containerized and hosted publicly on Google Kubernetes Engine (GKE).
+
+1. Build and Push to Docker Hub
 ```bash
-k3d image import pingpong-app:1.0 -c k3s-default
+docker build -t <your-dockerhub-username>/pingpong-app:1.0 -f pingpong/Dockerfile .
+docker push <your-dockerhub-username>/pingpong-app:1.0
+```
+2. Deploy to GKE Cluster
+Ensure your kubectl context is pointed to your active GKE cluster, then apply the manifests:
+```bash
+kubectl create namespace exercises --dry-run=client -o yaml | kubectl apply -f -
 kubectl apply -f manifests/
 ```
-
-Now you can test it:
+3. Verify Public Traffic
+A cloud network load balancer handles external traffic routing. Fetch the assigned public IP address:
 ```bash
-curl http://localhost:8082/pingpong
+kubectl get svc pingpong-app-svc -n exercises
+```
+Test the live public endpoint using the EXTERNAL-IP:
+```bash
+curl http://<EXTERNAL-IP>/pingpong
 ```
 
 ## Namespace Separation
