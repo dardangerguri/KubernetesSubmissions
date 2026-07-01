@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"time"
+	"unicode/utf8"
 
 	_ "github.com/lib/pq"
 )
@@ -86,12 +87,22 @@ func main() {
 			var newTodo Todo
 			err := json.NewDecoder(r.Body).Decode(&newTodo)
 			if err != nil || newTodo.Text == "" {
+				fmt.Println("LOG: Received malformed or empty todo request")
 				http.Error(w, "DB request", http.StatusBadRequest)
 				return
 			}
 
+			if utf8.RuneCountInString(newTodo.Text) > 140 {
+				fmt.Printf("LOG REJECTED: Todo exceeded 140 characters\n")
+				http.Error(w, "Todo content too long. Maximum 140 characters allowed.", http.StatusBadRequest)
+				return
+			}
+
+			fmt.Printf("LOG SUCCESS: Saving new todo: '%s'\n", newTodo.Text)
+
 			_, err = db.Exec("INSERT INTO todos (text) VALUES ($1)", newTodo.Text)
 			if err != nil {
+				fmt.Printf("LOG ERROR: Failed to insert into DB: %v\n", err)
 				http.Error(w, "DB error", 500)
 				return
 			}

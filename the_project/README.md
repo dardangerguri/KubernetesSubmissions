@@ -47,6 +47,23 @@ then got to
 http://localhost:8080
 ```
 
+## Logging
+The backend includes structural input checks and logging explicitly tracked for observability stack monitoring
+
+- Enforces a strict 140-character maximum limit on the backend. Requests exceeding this limit receive a `400 Bad Request`.
+- Formats structured logs to standard output (`stdout`) for successful posts as well as input rejections.
+
+Testing the logs:
+```bash
+kubectl port-forward service/todo-backend-svc 8082:80 -n project
+
+curl -X POST http://localhost:8082/todos \
+  -H "Content-Type: application/json" \
+  -d '{"text": "LONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONG."}'
+
+kubectl logs -l app=todo-backend -n project --tail=20
+```
+
 ## Testing the Bot
 ```bash
 kubectl create job --from=cronjob/wikipedia-todo-job test-wikipedia-job -n project
