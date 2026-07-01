@@ -32,13 +32,14 @@ kubectl create namespace exercises --dry-run=client -o yaml | kubectl apply -f -
 kubectl apply -f manifests/
 ```
 3. Verify Public Traffic
-A cloud network load balancer handles external traffic routing. Fetch the assigned public IP address:
+Traffic routing is handled using the modern Kubernetes Gateway API connected to a Google Cloud Layer 7 Load Balancer. Fetch the assigned public IP address from the Gateway:
 ```bash
 kubectl get svc pingpong-app-svc -n exercises
 ```
-Test the live public endpoint using the EXTERNAL-IP:
+Test the live public endpoint using the ADDRESS IP:
 ```bash
-curl http://<EXTERNAL-IP>/pingpong
+curl http://<GATEWAY-ADDRESS-IP>/pingpong
+curl http://<GATEWAY-ADDRESS-IP>/
 ```
 
 ## Namespace Separation
