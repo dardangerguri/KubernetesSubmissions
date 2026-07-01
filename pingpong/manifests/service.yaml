@@ -4,7 +4,7 @@ metadata:
   name: pingpong-app-svc
   namespace: exercises
 spec:
-  type: LoadBalancer
+  type: ClusterIP
   selector:
     app: pingpong-app
   ports:

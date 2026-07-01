@@ -33,25 +33,26 @@ kubectl rollout restart deployment log-output-dep -n exercises
 
 ## Build and Push to Cluster
 
-#### Build Docker images
+#### Build Docker images for GKE (amd64)
 ```bash
-docker build -t log-writer:1.0 -f writer/Dockerfile .
-docker build -t log-reader:1.0 -f reader/Dockerfile .
+docker build --platform linux/amd64 -t dardangerguri/log-writer:1.0-amd64 -f log_output/writer/Dockerfile log_output/
+docker build --platform linux/amd64 -t dardangerguri/log-reader:1.0-amd64 -f log_output/reader/Dockerfile log_output/
 ```
-#### Import images into the k3d cluster nodes
+
+#### Push to Docker Hub
 ```bash
-k3d image import log-writer:1.0 log-reader:1.0 -c k3s-default
+docker push dardangerguri/log-writer:1.0-amd64
+docker push dardangerguri/log-reader:1.0-amd64
 ```
 
 ## Run in Kubernetes
-
 ```bash
 kubectl apply -f manifests/
 ```
 
 Now you can test it:
 ```bash
-curl http://localhost:8081/
+curl http://136.68.44.240/
 ```
 
 ## Namespace Separation

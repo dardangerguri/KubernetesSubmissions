@@ -22,8 +22,8 @@ The application is fully containerized and hosted publicly on Google Kubernetes 
 
 1. Build and Push to Docker Hub
 ```bash
-docker build -t <your-dockerhub-username>/pingpong-app:1.0 -f pingpong/Dockerfile .
-docker push <your-dockerhub-username>/pingpong-app:1.0
+docker build --platform linux/amd64 -t dardangerguri/pingpong-app:2.0-amd64 -f pingpong/Dockerfile pingpong/
+docker push dardangerguri/pingpong-app:2.0-amd64
 ```
 2. Deploy to GKE Cluster
 Ensure your kubectl context is pointed to your active GKE cluster, then apply the manifests:

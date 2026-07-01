@@ -74,6 +74,12 @@ func main() {
 
 	initDB()
 
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprintf(w, "OK")
+	})
+
 	http.HandleFunc("/pingpong", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 

@@ -22,15 +22,15 @@ spec:
 
       containers:
         - name: log-writer
-          image: log-writer:1.0
-          imagePullPolicy: IfNotPresent
+          image: dardangerguri/log-writer:1.0
+          imagePullPolicy: Always
           volumeMounts:
             - name: log-storage
               mountPath: /shared
 
         - name: log-reader
-          image: log-reader:1.0
-          imagePullPolicy: IfNotPresent
+          image: dardangerguri/log-reader:1.0
+          imagePullPolicy: Always
           ports:
             - containerPort: 8080
           env:
