@@ -75,12 +75,12 @@ func main() {
 	initDB()
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
-		w.WriteHeader(http.StatusOK)
-		fmt.Fprintf(w, "OK")
-	})
+		if r.URL.Path != "/" {
+			w.WriteHeader(http.StatusOK)
+			fmt.Fprintf(w, "OK")
+			return
+		}
 
-	http.HandleFunc("/pingpong", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 
 		counter := getCounter()

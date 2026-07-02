@@ -5,19 +5,25 @@ metadata:
   namespace: exercises
 spec:
   parentRefs:
-  - name: shared-gateway
+    - name: shared-gateway
   rules:
-  - matches:
-    - path:
-        type: PathPrefix
-        value: /pingpong
-    backendRefs:
-    - name: pingpong-app-svc
-      port: 80
-  - matches:
-    - path:
-        type: PathPrefix
-        value: /
-    backendRefs:
-    - name: log-output-svc
-      port: 80
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /pingpong
+      filters:
+        - type: URLRewrite
+          urlRewrite:
+            path:
+              type: ReplacePrefixMatch
+              replacePrefixMatch: /
+      backendRefs:
+        - name: pingpong-app-svc
+          port: 80
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: log-output-svc
+          port: 80
