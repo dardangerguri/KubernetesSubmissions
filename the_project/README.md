@@ -28,7 +28,7 @@ This project uses **GitHub Actions** for automated CI/CD. Every push builds the 
 
 - Pushes to the `main` branch are deployed to the `project` namespace.
 - Pushes to any other branch automatically create (if needed) and deploy to a namespace with the same name as the branch, providing an isolated preview environment.
-
+- Deleting a branch automatically deletes its preview namespace.
 
 To trigger a deployment:
 ```bash
