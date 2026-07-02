@@ -1,0 +1,12 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - backend_deployment.yaml
+  - backend_service.yaml
+  - cronjob.yaml
+  - db_config.yaml
+  - frontend_deployment.yaml
+  - frontend_service.yaml
+  - ingress.yaml
+  - postgres_service.yaml
+  - postgres_statefulset.yaml

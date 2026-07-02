@@ -15,8 +15,8 @@ spec:
     spec:
       containers:
         - name: todo-app
-          image: todo-app:1.0
-          imagePullPolicy: IfNotPresent
+          image: dardangerguri/todo-app:1.1
+          imagePullPolicy: Always
           ports:
             - containerPort: 8080
           volumeMounts:

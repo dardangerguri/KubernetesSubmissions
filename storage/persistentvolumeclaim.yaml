@@ -4,7 +4,7 @@ metadata:
   name: shared-todo-pvc
   namespace: project
 spec:
-  storageClassName: local-path
+  storageClassName: standard-rwo
   accessModes:
     - ReadWriteOnce
   resources:
