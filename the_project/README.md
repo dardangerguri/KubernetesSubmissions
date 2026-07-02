@@ -103,3 +103,22 @@ The production deployment runs inside the `project` namespace.
 kubectl get all -n project
 kubectl get all -n test-preview
 ```
+
+## Resource Limits (No Cluster Crashing)
+
+To stop the app from hogging all the cluster resources or crashing the nodes, everything has strict CPU and memory limits now:
+
+- **Frontend & Backend:** Requests `50m` CPU / `64Mi` RAM, can burst up to `150m` CPU / `128Mi` RAM max.
+- **Postgres DB:** Requests `100m` CPU / `128Mi` RAM, capped at `300m` CPU / `256Mi` RAM so database queries run smooth.
+
+## GKE Cloud Logging & Monitoring
+
+The cluster uses Google Cloud's native **Logs Explorer** to track what's happening in real-time. No need to spam `kubectl logs` all day—everything streams right to the GCP console.
+
+To find the backend logs instantly, run this query in the Logs Explorer dashboard:
+
+```query
+resource.type="k8s_container"
+resource.labels.namespace_name="project"
+resource.labels.container_name="todo-backend"
+```
