@@ -22,16 +22,14 @@ docker build -t todo-app:1.0 ./frontend
 docker build -t todo-backend:1.0 ./backend
 ```
 
-## Run in Kubernetes (GKE with Kustomize)
+## Run in Kubernetes (GKE with GitHub Actions & Kustomize)
+This project uses **GitHub Actions** for automated CI/CD. Every push to the `main` branch builds the backend and frontend Docker images, pushes them to **Google Artifact Registry**, and deploys them to the GKE cluster using **Kustomize**.
 
+To trigger a manual or new deployment, simply push your changes to your repository:
 ```bash
-docker build -t todo-app:1.0 ./frontend
-docker build -t todo-backend:1.0 ./backend
-
-docker push dardangerguri/todo-app:1.0
-docker push dardangerguri/todo-backend:1.0
-
-kubectl apply -k the_project/manifests
+git add .
+git commit -m "Your deployment message"
+git push origin main
 ```
 
 ## Access

@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: todo-backend
-          image: dardangerguri/todo-backend:1.1
+          image: todo-backend
           imagePullPolicy: Always
           ports:
             - containerPort: 8081

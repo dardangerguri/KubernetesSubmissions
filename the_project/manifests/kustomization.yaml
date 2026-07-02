@@ -10,3 +10,11 @@ resources:
   - ingress.yaml
   - postgres_service.yaml
   - postgres_statefulset.yaml
+images:
+  - name: todo-backend
+    newName: europe-north1-docker.pkg.dev/project-8802feef-4699-43fe-ad8/gke-apps-repo/todo-backend
+    newTag: latest
+
+  - name: todo-frontend
+    newName: europe-north1-docker.pkg.dev/project-8802feef-4699-43fe-ad8/gke-apps-repo/todo-frontend
+    newTag: latest

@@ -4,6 +4,8 @@ metadata:
   name: todo-app-dep
   namespace: project
 spec:
+  strategy:
+    type: Recreate
   replicas: 1
   selector:
     matchLabels:
@@ -15,7 +17,7 @@ spec:
     spec:
       containers:
         - name: todo-app
-          image: dardangerguri/todo-app:1.1
+          image: todo-frontend
           imagePullPolicy: Always
           ports:
             - containerPort: 8080
