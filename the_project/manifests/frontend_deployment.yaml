@@ -20,6 +20,13 @@ spec:
           imagePullPolicy: Always
           ports:
             - containerPort: 8080
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "64Mi"
+            limits:
+              cpu: "150m"
+              memory: "128Mi"
           volumeMounts:
             - name: shared-storage
               mountPath: /shared
@@ -28,7 +35,6 @@ spec:
               value: "http://todo-backend-svc/todos"
             - name: IMAGE_URL
               value: "https://picsum.photos/1200"
-
       volumes:
         - name: shared-storage
           persistentVolumeClaim:
