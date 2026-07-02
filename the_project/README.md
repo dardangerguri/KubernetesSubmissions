@@ -15,6 +15,28 @@ It is a simple web server for the DevOps with Kubernetes course that displays an
 
 ---
 
+## Automated Database Backups (`postgres-backup-job`)
+A secure Kubernetes CronJob that triggers once every 24 hours. It automatically dumps the PostgreSQL database contents and uploads the backup file securely to a Google Cloud Storage (GCS) bucket.
+
+- **Security:** Uses GKE **Workload Identity Federation** to safely authenticate with Google Cloud without storing any hardcoded service account JSON keys inside the cluster or GitHub.
+- **Tools:** Uses a lightweight `google/cloud-sdk:alpine` image to install native Postgres client utilities (`pg_dump`) on the fly, keeping the backup image minimal and up to date.
+- **Storage Bucket:** Backups are saved with a timestamp format (`backup-YYYYMMDDHHMMSS.sql`) inside the `todo-db-backups-8802feef` GCS bucket.
+
+### Testing the Backup Job Manually
+To force an immediate database backup without waiting for midnight:
+```bash
+# Trigger a one-time manual execution from the CronJob
+kubectl create job --from=cronjob/postgres-backup-job test-backup-run -n project
+
+# View the execution and upload progress logs
+kubectl logs -l job-name=test-backup-run -n project
+
+# Verify the backup file exists in the cloud storage bucket
+gcloud storage ls gs://todo-db-backups-8802feef/
+
+# Clean up the manual test run
+kubectl delete job test-backup-run -n project
+
 ## Run with Docker
 
 ```bash
