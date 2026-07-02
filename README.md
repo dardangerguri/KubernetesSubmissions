@@ -38,3 +38,4 @@
 - [3.1.](https://github.com/dardangerguri/KubernetesSubmissions/tree/3.1/pingpong)
 - [3.2.](https://github.com/dardangerguri/KubernetesSubmissions/tree/3.2)
 - [3.3.](https://github.com/dardangerguri/KubernetesSubmissions/tree/3.3)
+- [3.4.](https://github.com/dardangerguri/KubernetesSubmissions/tree/3.4)
