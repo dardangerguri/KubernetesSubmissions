@@ -8,6 +8,7 @@ resources:
   - frontend_deployment.yaml
   - frontend_service.yaml
   - ingress.yaml
+  - persistentvolumeclaim.yaml
   - postgres_service.yaml
   - postgres_statefulset.yaml
 images:

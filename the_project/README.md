@@ -23,9 +23,14 @@ docker build -t todo-backend:1.0 ./backend
 ```
 
 ## Run in Kubernetes (GKE with GitHub Actions & Kustomize)
-This project uses **GitHub Actions** for automated CI/CD. Every push to the `main` branch builds the backend and frontend Docker images, pushes them to **Google Artifact Registry**, and deploys them to the GKE cluster using **Kustomize**.
+This project uses **GitHub Actions** for automated CI/CD. Every push builds the backend and frontend Docker images, pushes them to **Google Artifact Registry**, and deploys them to the GKE cluster using **Kustomize**.
 
-To trigger a manual or new deployment, simply push your changes to your repository:
+
+- Pushes to the `main` branch are deployed to the `project` namespace.
+- Pushes to any other branch automatically create (if needed) and deploy to a namespace with the same name as the branch, providing an isolated preview environment.
+
+
+To trigger a deployment:
 ```bash
 git add .
 git commit -m "Your deployment message"
@@ -71,7 +76,8 @@ kubectl delete job test-wikipedia-job -n project
 ```
 
 ## Namespace Separation
-This application is deployed inside the isolated `project` namespace.
+The production deployment runs inside the `project` namespace.
 ```bash
 kubectl get all -n project
+kubectl get all -n test-preview
 ```
