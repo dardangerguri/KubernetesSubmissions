@@ -49,6 +49,10 @@
 - [3.12.](https://github.com/dardangerguri/KubernetesSubmissions/tree/3.12)
 
 
+### Chapter 5
+
+- [4.1.](https://github.com/dardangerguri/KubernetesSubmissions/tree/4.1)
+
 ## Exercise 3.9: DBaaS vs DIY Database Comparison
 
 A pros and cons of using Database-as-a-Service (DBaaS) like Google Cloud SQL versus a Do-It-Yourself (DIY) database running inside GKE (PostgreSQL StatefulSet).
