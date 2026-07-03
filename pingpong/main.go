@@ -20,9 +20,9 @@ func initDB() {
 		panic(err)
 	}
 
-	err = db.Ping()
-	if err != nil {
-		panic(err)
+	if err := db.Ping(); err != nil {
+		fmt.Println("Database not available yet")
+		return
 	}
 
 	_, err = db.Exec(`
@@ -93,6 +93,15 @@ func main() {
 	http.HandleFunc("/pings", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 			fmt.Fprintf(w, "%d", getCounter())
+	})
+
+	http.HandleFunc("/ready", func(w http.ResponseWriter, r *http.Request) {
+		if err := db.Ping(); err != nil {
+			http.Error(w, "database not ready", http.StatusServiceUnavailable)
+			return
+		}
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprint(w, "OK")
 	})
 
 	fmt.Printf("Ping-pong server started in port %s\n", port)
