@@ -15,7 +15,7 @@ const imagePath = "/shared/todo_image.jpg"
 func getBackendURL() string {
 	url := os.Getenv("BACKEND_URL")
 	if url == "" {
-		return "http://todo-backend-svc/todos"
+		return "http://todo-backend-svc"
 	}
 	return url
 }
@@ -69,6 +69,16 @@ func getTodosFromBackend(backendUrl string) []Todo {
 	return list
 }
 
+func isBackendHealthy() bool {
+	resp, err := http.Get("http://todo-backend-svc/healthz")
+	if err != nil {
+		return false
+	}
+	defer resp.Body.Close()
+
+	return resp.StatusCode == http.StatusOK
+}
+
 func main() {
 	backendUrl := getBackendURL()
 
@@ -79,6 +89,51 @@ func main() {
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+
+		if !isBackendHealthy() {
+			w.Header().Set("Content-Type", "text/html; charset=utf-8")
+			w.WriteHeader(http.StatusOK)
+
+			htmlFailure := `<!DOCTYPE html>
+			<html>
+			<head>
+				<title>Todo App - Failure</title>
+				<style>
+					body {
+						font-family: Arial, sans-serif;
+						text-align: center;
+						margin-top: 100px;
+						background-color: #fff5f5;
+					}
+					.error-container {
+						border: 2px solid #feb2b2;
+						background-color: #fff5f5;
+						padding: 40px;
+						display: inline-block;
+						border-radius: 8px;
+					}
+					h1 {
+						color: #9b2c2c;
+						font-size: 3rem;
+						margin-bottom: 10px;
+					}
+					p {
+						color: #c53030;
+						font-size: 1.2rem;
+					}
+				</style>
+			</head>
+			<body>
+				<div class="error-container">
+					<h1>System Failure</h1>
+					<p>The Todo App is currently unhealthy. Please wait for recovery.</p>
+				</div>
+			</body>
+			</html>`
+
+			fmt.Fprint(w, htmlFailure)
+			return
+		}
 
 		currentTodos := getTodosFromBackend(backendUrl)
 		var todoItemsHTML string
@@ -166,6 +221,9 @@ func main() {
 			<div class="todo-list">
 				%s
 			</div>
+			<form action="/break" method="POST" style="margin-top:20px;">
+				<button type="submit" style="background-color:#dc3545;">Break application</button>
+			</form>
 		</body>
 		</html>`, todoItemsHTML)
 
@@ -182,25 +240,39 @@ func main() {
 			todoObj := Todo{Text: todoText}
 			jsonData, _ := json.Marshal(todoObj)
 
-			_, err := http.Post(backendUrl, "application/json", bytes.NewBuffer(jsonData))
-			if err != nil {
-				fmt.Printf("Error creating todo on backend: %v\n", err)
-			}
+			http.Post(getBackendURL()+"/todos", "application/json", bytes.NewBuffer(jsonData))
 		}
 
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 	})
 
-	http.HandleFunc("/image", func(w http.ResponseWriter, r *http.Request) {
-		err := fetchAndCacheImage()
-		if err != nil {
-			fmt.Printf("Error fetching image: %v\n", err)
+	http.HandleFunc("/break", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			http.Redirect(w, r, "/", http.StatusSeeOther)
+			return
 		}
+
+		baseUrl := "http://todo-backend-svc"
+		envUrl := os.Getenv("BACKEND_URL")
+
+		if envUrl != "" {
+			baseUrl = envUrl
+			if len(baseUrl) > 6 && baseUrl[len(baseUrl)-6:] == "/todos" {
+				baseUrl = baseUrl[:len(baseUrl)-6]
+			}
+		}
+
+		http.Post(baseUrl+"/break", "text/plain", nil)
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+	})
+
+	http.HandleFunc("/image", func(w http.ResponseWriter, r *http.Request) {
+		_ = fetchAndCacheImage()
 		http.ServeFile(w, r, imagePath)
 	})
 
 	fmt.Printf("Frontend server started in port %s\n", port)
-	if err := http.ListenAndServe(":"+port, nil); err !=nil {
+	if err := http.ListenAndServe(":"+port, nil); err != nil {
 		fmt.Printf("Error starting frontend: %v\n", err)
 	}
 }

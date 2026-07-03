@@ -122,3 +122,10 @@ resource.type="k8s_container"
 resource.labels.namespace_name="project"
 resource.labels.container_name="todo-backend"
 ```
+
+## Health Checks
+
+The backend exposes two internal endpoints:
+
+- `GET /healthz` - Returns healthy only when the application and database are available.
+- `POST /break` - Simulates an application failure. Kubernetes detects the failed liveness probe and automatically restarts the pod.

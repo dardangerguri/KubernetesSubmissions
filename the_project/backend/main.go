@@ -18,6 +18,8 @@ type Todo struct {
 
 var db *sql.DB
 
+var isBroken = false
+
 func initDB() {
 	connStr := fmt.Sprintf(
 		"host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
@@ -113,6 +115,34 @@ func main() {
 		default:
 			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		}
+	})
+
+	http.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
+		if isBroken {
+			http.Error(w, "unhealthy", http.StatusInternalServerError)
+			return
+		}
+
+		if err := db.Ping(); err != nil {
+			http.Error(w, "database unavailable", http.StatusServiceUnavailable)
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprint(w, "OK")
+	})
+
+	http.HandleFunc("/break", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+			return
+		}
+
+		isBroken = true
+		fmt.Println("Application entered broken state")
+
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprint(w, "Application broken")
 	})
 
 	fmt.Printf("Backend server started in port %s\n", port)
