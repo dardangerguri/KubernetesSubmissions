@@ -46,6 +46,18 @@ func main() {
 	port := "8080"
 	fmt.Println("Server started on port", port)
 
+	http.HandleFunc("/ready", func(w http.ResponseWriter, r *http.Request) {
+		resp, err := http.Get("http://pingpong-app-svc.exercises.svc.cluster.local/pings")
+		if err != nil || resp.StatusCode != http.StatusOK {
+			http.Error(w, "pingpong not ready", http.StatusServiceUnavailable)
+			return
+		}
+		defer resp.Body.Close()
+
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprint(w, "OK")
+	})
+
 	http.ListenAndServe(":"+port, nil)
 }
 

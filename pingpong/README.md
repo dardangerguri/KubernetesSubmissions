@@ -52,3 +52,12 @@ kubectl get all -n exercises
 - It uses its own PersistentVolumeClaim defined with the StatefulSet (volumeClaimTemplates)
 - The database stores the Pingpong counter
 - Data persists across pod restarts and rescheduling
+
+## Readiness Probe
+
+The application exposes a `/ready` endpoint for Kubernetes.
+
+- Returns **200 OK** when the application has a working connection to PostgreSQL.
+- Returns **503 Service Unavailable** while the database is unavailable.
+
+This allows Kubernetes to keep the container running while delaying traffic until the database is ready.

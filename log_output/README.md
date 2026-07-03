@@ -60,3 +60,11 @@ This application is deployed inside the isolated `exercises` namespace.
 ```bash
 kubectl get all -n exercises
 ```
+## Readiness Probe
+
+The reader container exposes a `/ready` endpoint for Kubernetes.
+
+- Returns **200 OK** when the Pingpong application can be reached.
+- Returns **503 Service Unavailable** while the Pingpong application is unavailable.
+
+This ensures the application only receives traffic after its dependency is ready.
