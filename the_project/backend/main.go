@@ -10,6 +10,7 @@ import (
 	"unicode/utf8"
 
 	_ "github.com/lib/pq"
+	"github.com/nats-io/nats.go"
 )
 
 type Todo struct {
@@ -19,6 +20,7 @@ type Todo struct {
 }
 
 var db *sql.DB
+var nc *nats.Conn
 
 var isBroken = false
 
@@ -59,6 +61,27 @@ func initDB() {
 	}
 }
 
+func initNATS() {
+	natsUrl := os.Getenv("NATS_URL")
+	if natsUrl == "" {
+		natsUrl = nats.DefaultURL
+	}
+
+	var err error
+	for i := 0; i < 10; i++ {
+		nc, err = nats.Connect(natsUrl)
+		if err == nil {
+			break
+		}
+		fmt.Println("Waiting for NATS...")
+		time.Sleep(2 * time.Second)
+	}
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println("Connected to NATS")
+}
+
 func main() {
 	port := os.Getenv("PORT")
 	if port == "" {
@@ -66,6 +89,8 @@ func main() {
 	}
 
 	initDB()
+	initNATS()
+	defer nc.Close()
 
 	http.HandleFunc("/todos", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
@@ -115,6 +140,8 @@ func main() {
 				http.Error(w, "DB error", 500)
 				return
 			}
+
+			nc.Publish("todos", []byte(fmt.Sprintf("A todo was created: %s", newTodo.Text)))
 
 			w.WriteHeader(http.StatusCreated)
 			json.NewEncoder(w).Encode(newTodo)

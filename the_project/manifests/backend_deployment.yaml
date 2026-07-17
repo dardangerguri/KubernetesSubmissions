@@ -66,3 +66,5 @@ spec:
                 configMapKeyRef:
                   name: db-config
                   key: DB_NAME
+            - name: NATS_URL
+              value: "nats://nats-svc:4222"

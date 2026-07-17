@@ -12,7 +12,11 @@ resources:
   - postgres_service.yaml
   - postgres_statefulset.yaml
   - db_backup_cronjob.yaml
+  - nats.yaml
+  - broadcaster_deployment.yaml
 images:
   - name: todo-backend
 
   - name: todo-frontend
+
+  - name: todo-broadcaster

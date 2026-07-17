@@ -1,8 +1,7 @@
-module todo-backend
+module todo-broadcaster
 
 go 1.25
 
 require (
-	github.com/lib/pq v1.12.3
 	github.com/nats-io/nats.go v1.52.0
 )

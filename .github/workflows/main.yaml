@@ -51,6 +51,7 @@ jobs:
         run: |
           echo "BACKEND_IMAGE=$REGISTRY/$PROJECT_ID/$REPOSITORY/todo-backend:$GITHUB_SHA" >> $GITHUB_ENV
           echo "FRONTEND_IMAGE=$REGISTRY/$PROJECT_ID/$REPOSITORY/todo-frontend:$GITHUB_SHA" >> $GITHUB_ENV
+          echo "BROADCASTER_IMAGE=$REGISTRY/$PROJECT_ID/$REPOSITORY/todo-broadcaster:$GITHUB_SHA" >> $GITHUB_ENV
 
       - name: Set namespace
         run: |
@@ -70,6 +71,11 @@ jobs:
           docker build --tag $FRONTEND_IMAGE ./the_project/frontend
           docker push $FRONTEND_IMAGE
 
+      - name: Build and Publish Broadcaster
+        run: |
+          docker build --tag $BROADCASTER_IMAGE ./the_project/broadcaster
+          docker push $BROADCASTER_IMAGE
+
       - name: Set up Kustomize
         uses: imranismail/setup-kustomize@v3
 
@@ -84,9 +90,11 @@ jobs:
           kustomize edit set namespace $NAMESPACE
           kustomize edit set image todo-backend=$BACKEND_IMAGE
           kustomize edit set image todo-frontend=$FRONTEND_IMAGE
+          kustomize edit set image todo-broadcaster=$BROADCASTER_IMAGE
 
           kustomize build . | kubectl apply -f -
 
           kubectl rollout status deployment/todo-backend-dep -n $NAMESPACE
           kubectl rollout status deployment/todo-app-dep -n $NAMESPACE
           kubectl get services -o wide -n $NAMESPACE
+          kubectl rollout status deployment/todo-broadcaster-dep -n $NAMESPACE

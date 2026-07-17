@@ -1,9 +1,10 @@
-FROM golang:1.22
+FROM golang:1.25
 
 WORKDIR /app
 
 COPY . .
 
+RUN go mod tidy
 RUN go build -o todo_backend .
 
 CMD ["./todo_backend"]

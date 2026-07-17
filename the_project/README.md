@@ -141,3 +141,19 @@ The backend exposes two internal endpoints:
 - `GET /healthz` - Returns healthy only when the application and database are available.
 - `POST /break` - Simulates an application failure. Kubernetes detects the failed liveness probe and automatically restarts the pod.
 - `PUT /todos/:id` - Updates a specific task's done status in the database to toggle its completed state.
+
+## Broadcaster Microservice & Message Broker (NATS)
+
+The application has been upgraded with an event-driven architecture using **NATS** to handle live notifications whenever todos are added or completed.
+
+- **Message Broker (`nats`):** A lightweight message queue deployed as a ClusterIP service inside the cluster.
+- **Broadcaster (`todo-broadcaster`):** A dedicated microservice written in Go that listens to the `todos` subject on NATS and forwards the event message payload securely to an external chat webhook.
+- **Horizontal Scaling & Deduplication:** Scaled to **6 replicas** to meet high availability requirements. It utilizes NATS **Queue Groups** (`QueueSubscribe` under the `todos-group` channel) ensuring that even with 6 active replicas, **only one instance** receives and broadcasts any given message, completely preventing duplicate notifications.
+
+### Verifying the Broadcaster Logs & Replicas
+
+```bash
+kubectl get pods -l app=todo-broadcaster -n project
+
+kubectl logs -l app=todo-broadcaster -n project --tail=20 -f
+```
