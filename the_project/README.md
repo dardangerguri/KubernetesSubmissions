@@ -123,6 +123,17 @@ resource.labels.namespace_name="project"
 resource.labels.container_name="todo-backend"
 ```
 
+## Prometheus Monitoring
+
+To verify the monitoring setup, the Alertmanager StatefulSet was scaled to 3 replicas to test aggregation metrics:
+```bash
+kubectl scale statefulset prometheus-test-alertmanager --replicas=3 -n monitoring
+```
+The following PromQL query successfully filters and counts the 3 running StatefulSet pods:
+```bash
+sum(kube_pod_info{namespace="monitoring", created_by_kind="StatefulSet"})
+```
+
 ## Health Checks
 
 The backend exposes two internal endpoints:
