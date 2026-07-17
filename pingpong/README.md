@@ -61,3 +61,15 @@ The application exposes a `/ready` endpoint for Kubernetes.
 - Returns **503 Service Unavailable** while the database is unavailable.
 
 This allows Kubernetes to keep the container running while delaying traffic until the database is ready.
+
+## Canary Deployments (Argo Rollouts)
+
+The application utilizes **Argo Rollouts** instead of standard Kubernetes Deployments to manage safe, automated canary releases.
+
+- **Analysis Template**: Monitors total CPU usage rate (`container_cpu_usage_seconds_total`) across the entire `exercises` namespace during updates.
+- **Automated Rollback**: If the total namespace CPU usage exceeds the threshold checked via Prometheus (`prometheus-test-server.monitoring`), the rollout automatically aborts and reverts to the previous stable version.
+
+### Manage the Rollout
+```bash
+kubectl get analysisruns -n exercises
+```

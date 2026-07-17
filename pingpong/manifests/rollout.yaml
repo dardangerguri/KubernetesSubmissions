@@ -1,0 +1,28 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: pingpong-app-rollout
+  namespace: exercises
+spec:
+  replicas: 1
+  strategy:
+    canary:
+      analysis:
+        templates:
+          - templateName: cpu-usage-rate
+      steps:
+        - setWeight: 50
+        - pause: {}
+  selector:
+    matchLabels:
+      app: pingpong-app
+  template:
+    metadata:
+      labels:
+        app: pingpong-app
+    spec:
+      containers:
+        - name: pingpong-app
+          image: dardangerguri/pingpong-app:2.4
+          ports:
+            - containerPort: 8080
