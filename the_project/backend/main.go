@@ -13,7 +13,9 @@ import (
 )
 
 type Todo struct {
+	ID int `json:"id"`
 	Text string `json:"text"`
+	Done bool `json:"done"`
 }
 
 var db *sql.DB
@@ -48,7 +50,8 @@ func initDB() {
 	_, err = db.Exec(`
 		CREATE TABLE IF NOT EXISTS todos (
 			id SERIAL PRIMARY KEY,
-			text TEXT NOT NULL
+			text TEXT NOT NULL,
+			done BOOLEAN DEFAULT FALSE
 		)
 	`)
 	if err != nil {
@@ -69,7 +72,7 @@ func main() {
 
 		switch r.Method {
 		case http.MethodGet:
-			rows, err := db.Query("SELECT text FROM todos")
+			rows, err := db.Query("SELECT id, text, done FROM todos ORDER BY id ASC")
 			if err != nil {
 				http.Error(w, "DB error", 500)
 				return
@@ -79,7 +82,11 @@ func main() {
 			todos:= []Todo{}
 			for rows.Next() {
 				var t Todo
-				rows.Scan(&t.Text)
+				rows.Scan(&t.ID, &t.Text, &t.Done)
+				if err != nil {
+					http.Error(w, "DB scan error", 500)
+					return
+				}
 				todos = append(todos, t)
 			}
 
@@ -115,6 +122,38 @@ func main() {
 		default:
 			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		}
+	})
+
+	http.HandleFunc("/todos/", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPut {
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+			return
+		}
+
+		idStr := r.URL.Path[len("/todos/"):]
+		if idStr == "" {
+			http.Error(w, "Missing ID", http.StatusBadRequest)
+			return
+		}
+
+		var updateData struct {
+			Done bool `json:"done"`
+		}
+		err := json.NewDecoder(r.Body).Decode(&updateData)
+		if err != nil {
+			http.Error(w, "Malformed JSON", http.StatusBadRequest)
+			return
+		}
+
+		_, err = db.Exec("UPDATE todos SET done = $1 WHERE id = $2", updateData.Done, idStr)
+		if err != nil {
+			fmt.Printf("LOG ERROR: Failed to update DB: %v\n", err)
+			http.Error(w, "DB error", 500)
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprint(w, `{"status":"updated"}`)
 	})
 
 	http.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {

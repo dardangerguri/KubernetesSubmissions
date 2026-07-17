@@ -29,7 +29,9 @@ func getImageURL() string {
 }
 
 type Todo struct {
+	ID int `json:"id"`
 	Text string `json:"text"`
+	Done bool `json:"done"`
 }
 
 func fetchAndCacheImage() error {
@@ -138,7 +140,19 @@ func main() {
 		currentTodos := getTodosFromBackend(backendUrl)
 		var todoItemsHTML string
 		for _, todo := range currentTodos {
-			todoItemsHTML += fmt.Sprintf(`<div class="todo-item">%s</div>`, todo.Text)
+			if todo.Done {
+				todoItemsHTML += fmt.Sprintf(`
+				<div class="todo-item done">
+					<span>%s</span> <span class="status-done">Done</span>
+				</div>`, todo.Text)
+			} else {
+				todoItemsHTML += fmt.Sprintf(`
+				<div class="todo-item">
+					<span>%s</span>
+					<form action="/update/%d" method="POST" style="margin: 0; flex-shrink: 0;"> <button type="submit" class="btn-done">Mark done</button>
+					</form>
+				</div>`, todo.Text, todo.ID)
+			}
 		}
 
 		html := fmt.Sprintf(`<!DOCTYPE html>
@@ -201,6 +215,37 @@ func main() {
 					border-left: 5px solid #28a745;
 					border-radius: 4px;
 					font-size: 1.1rem;
+					display: flex;
+					justify-content: space-between;
+					align-items: center;
+					gap: 20px;
+				}
+				.todo-item span:first-child {
+					word-break: break-all;
+					overflow-wrap: break-word;
+					flex-grow: 1;
+					min-width: 0;
+				}
+				.todo-item.done {
+					border-left: 5px solid #6c757d;
+					background-color: #e9ecef;
+				}
+				.btn-done {
+					padding: 6px 12px;
+					font-size: 0.9rem;
+					background-color: #0056b3;
+				}
+				.btn-done:hover {
+					background-color: #004085;
+				}
+				.status-done {
+					color: #28a745;
+					font-weight: bold;
+					white-space: nowrap;
+					flex-shrink: 0;
+				}
+				.todo-item form {
+					flex-shrink: 0;
 				}
 			</style>
 		</head>
@@ -241,6 +286,36 @@ func main() {
 			jsonData, _ := json.Marshal(todoObj)
 
 			http.Post(getBackendURL()+"/todos", "application/json", bytes.NewBuffer(jsonData))
+		}
+
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+	})
+
+	http.HandleFunc("/update/", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			http.Redirect(w, r, "/", http.StatusSeeOther)
+			return
+		}
+
+		idStr := r.URL.Path[len("/update/"):]
+		if idStr != "" {
+			payload := map[string]bool{"done": true}
+			jsonData, _ := json.Marshal(payload)
+
+			baseUrl := getBackendURL()
+			if len(baseUrl) > 6 && baseUrl[len(baseUrl)-6:] == "/todos" {
+				baseUrl = baseUrl[:len(baseUrl)-6]
+			}
+
+			req, err := http.NewRequest(http.MethodPut, baseUrl+"/todos/"+idStr, bytes.NewBuffer(jsonData))
+			if err == nil {
+				req.Header.Set("Content-Type", "application/json")
+				client := &http.Client{}
+				resp, err := client.Do(req)
+				if err == nil {
+					defer resp.Body.Close()
+				}
+			}
 		}
 
 		http.Redirect(w, r, "/", http.StatusSeeOther)

@@ -5,12 +5,12 @@ It is a simple web server for the DevOps with Kubernetes course that displays an
 ## What it does
 
 - Starts a frontend web server, a separate backend server, and a reliable database.
-- **Frontend (`todo-app`):** Serves the HTML, talks to the backend, and handles the image caching logic.
-- **Backend (`todo-backend`):** Exposes `GET /todos` and `POST /todos` endpoints to fetch and save your tasks into the database.
-- **Database (`todo-postgres`):** A PostgreSQL database managed by a StatefulSet to store your tasks securely.
+- **Frontend (`todo-app`):** Serves the HTML, talks to the backend, and handles the image caching logic. Updated with modern flexbox and defensive word-wrapping rules to keep buttons and task cards justified properly on the page.
+- **Backend (`todo-backend`):** Exposes endpoints to fetch, save, and update your tasks into the database. GET requests are sorted explicitly by ID to preserve chronological list ordering.
+- **Database (`todo-postgres`):** A PostgreSQL database managed by a StatefulSet to store your tasks securely. Updated to include a tracking column for completed tasks.
 - **Secure Configurations:** Uses Kubernetes ConfigMaps and Secrets to securely manage database credentials (host, port, user, database name, and password) without hardcoding them in the manifest files.
 - **Persistent Cache:** Keeps the image identical for 10 minutes. If the container crashes or restarts, it reuses the cached image from the persistent volume instead of hitting the external API again.
-- **Todo Interface:** Features a user input field with a strict 140-character maximum limit, a submit action button, and renders tasks dynamically from the backend service.
+- **Todo Interface:** Features a user input field with a strict 140-character maximum limit, a submit action button, a **"Mark done"** toggle button, and renders tasks dynamically from the backend service.
 - **Automated Wikipedia Bot (`wikipedia-todo-job`):** A Kubernetes CronJob that triggers once every hour. It automatically fetches a random Wikipedia article URL and issues a `POST` request to the backend to add a "Read <URL>" reminder task.
 
 ---
@@ -140,3 +140,4 @@ The backend exposes two internal endpoints:
 
 - `GET /healthz` - Returns healthy only when the application and database are available.
 - `POST /break` - Simulates an application failure. Kubernetes detects the failed liveness probe and automatically restarts the pod.
+- `PUT /todos/:id` - Updates a specific task's done status in the database to toggle its completed state.
