@@ -1,0 +1,43 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ../../base
+
+namespace: staging
+
+patches:
+
+  - patch: |-
+      $patch: delete
+      apiVersion: batch/v1
+      kind: CronJob
+      metadata:
+        name: postgres-backup-job
+    target:
+      kind: CronJob
+      name: postgres-backup-job
+
+  - patch: |-
+      $patch: delete
+      apiVersion: v1
+      kind: ServiceAccount
+      metadata:
+        name: postgres-backup-sa
+    target:
+      kind: ServiceAccount
+      name: postgres-backup-sa
+
+  - patch: |-
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: todo-broadcaster-dep
+      spec:
+        template:
+          spec:
+            containers:
+              - name: todo-broadcaster # Make sure this matches the exact container name in base/deployment.yaml
+                env:
+                  - name: WEBHOOK_URL
+                    value: ""

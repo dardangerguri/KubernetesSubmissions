@@ -26,16 +26,17 @@ A secure Kubernetes CronJob that triggers once every 24 hours. It automatically 
 To force an immediate database backup without waiting for midnight:
 ```bash
 # Trigger a one-time manual execution from the CronJob
-kubectl create job --from=cronjob/postgres-backup-job test-backup-run -n project
+kubectl create job --from=cronjob/postgres-backup-job test-backup-run -n production
 
 # View the execution and upload progress logs
-kubectl logs -l job-name=test-backup-run -n project
+kubectl logs -l job-name=test-backup-run -n production
 
 # Verify the backup file exists in the cloud storage bucket
 gcloud storage ls gs://todo-db-backups-8802feef/
 
 # Clean up the manual test run
-kubectl delete job test-backup-run -n project
+kubectl delete job test-backup-run -n production
+```
 
 ## Run with Docker
 
@@ -45,32 +46,32 @@ docker build -t todo-backend:1.0 ./backend
 ```
 
 ## Run in Kubernetes (GKE with GitHub Actions & Kustomize)
-This project uses **GitHub Actions** for automated CI/CD. Every push builds the backend and frontend Docker images, pushes them to **Google Artifact Registry**, and deploys them to the GKE cluster using **Kustomize**.
+This project uses **GitHub Actions** for automated CI/CD. Every push builds the backend, frontend, and broadcaster Docker images, pushes them to **Google Artifact Registry**, and updates the base Kustomize specifications.
 
+The infrastructure automatically reconciles across isolated environments using **Argo CD** based on the following Git triggers:
 
-- Pushes to the `main` branch are deployed to the `project` namespace.
-- Pushes to any other branch automatically create (if needed) and deploy to a namespace with the same name as the branch, providing an isolated preview environment.
+- **Staging Namespace (`staging`):** Reconciles automatically on every push to the `main` branch. Built for rapid iteration, Kustomize patches the environment to clear the broadcaster's `WEBHOOK_URL` (`value: ""`) so it strictly prints to standard container logs. The database backup CronJob is also pruned entirely from this environment.
+- **Production Namespace (`production`):** Reconciles strictly when a version tag matching the pattern `v*` (e.g., `v1.0.0`) is pushed. This is the fully featured deployment layer where external webhook notifications and hourly database backups are kept active.
 
-
-To trigger a deployment:
+To trigger a staging deployment:
 ```bash
 git add .
 git commit -m "Your deployment message"
 git push origin main
 ```
+To trigger a production release:
+```bash
+git tag v1.0.0
+git push origin v1.0.0
+```
 
 ## Access
-If Ingress port is enabled:
 ```bash
-http://<INGRESS-IP>
-```
-or, use port-forwarding directly to the frontend service:
-```bash
-kubectl port-forward service/todo-app-svc 8080:80 -n project
-````
-then got to
-```bash
-http://localhost:8080
+# For Staging
+kubectl port-forward service/todo-app-svc 8080:80 -n staging
+
+# For Production
+kubectl port-forward service/todo-app-svc 8081:80 -n production
 ```
 
 ## Logging
@@ -81,27 +82,29 @@ The backend includes structural input checks and logging explicitly tracked for 
 
 Testing the logs:
 ```bash
-kubectl port-forward service/todo-backend-svc 8082:80 -n project
+kubectl port-forward service/todo-backend-svc 8082:80 -n production
 
 curl -X POST http://localhost:8082/todos \
   -H "Content-Type: application/json" \
   -d '{"text": "LONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONGLONG."}'
 
-kubectl logs -l app=todo-backend -n project --tail=20
+kubectl logs -l app=todo-backend -n production --tail=20
 ```
 
 ## Testing the Bot
 ```bash
-kubectl create job --from=cronjob/wikipedia-todo-job test-wikipedia-job -n project
-kubectl logs -l job-name=test-wikipedia-job -n project
-kubectl delete job test-wikipedia-job -n project
+# Trigger bot job manually in production
+kubectl create job --from=cronjob/wikipedia-todo-job test-wikipedia-job -n production
+kubectl logs -l job-name=test-wikipedia-job -n production
+kubectl delete job test-wikipedia-job -n production
 ```
 
 ## Namespace Separation
-The production deployment runs inside the `project` namespace.
+The multi-environment setup separates environments neatly across their own designated namespaces.
 ```bash
-kubectl get all -n project
-kubectl get all -n test-preview
+kubectl get all -n staging
+
+kubectl get all -n production
 ```
 
 ## Resource Limits (No Cluster Crashing)
@@ -119,7 +122,7 @@ To find the backend logs instantly, run this query in the Logs Explorer dashboar
 
 ```query
 resource.type="k8s_container"
-resource.labels.namespace_name="project"
+resource.labels.namespace_name="production"
 resource.labels.container_name="todo-backend"
 ```
 
@@ -153,21 +156,24 @@ The application has been upgraded with an event-driven architecture using **NATS
 ### Verifying the Broadcaster Logs & Replicas
 
 ```bash
-kubectl get pods -l app=todo-broadcaster -n project
+# Check Staging Replicas and Logs
+kubectl get pods -l app=todo-broadcaster -n staging
+kubectl logs -l app=todo-broadcaster -n staging --tail=20 -f
 
-kubectl logs -l app=todo-broadcaster -n project --tail=20 -f
+# Check Production Replicas and Logs
+kubectl get pods -l app=todo-broadcaster -n production
+kubectl logs -l app=todo-broadcaster -n production --tail=20 -f
 ```
 
 ## GitOps Deployment
+This project uses **Argo CD** for automated GitOps continuous state synchronization.
 
-This project uses **Argo CD** for GitOps-based continuous deployment.
-
-- **Target Namespace:** `project`
-- **Sync Behavior:** Automatically tracks changes pushed to the `main` branch.
-- **Application Directory:** `the_project/manifests`
+- **Staging Monitor:** Tracks changes pushed directly to the `main` branch.
+- **Production Monitor:** Tracks releases triggered via version tags (`v*`).
 
 ### Manual Verification
-To check the status of the GitOps synchronization directly from the cluster:
+To check the running sync status of both environments directly from the cluster:
 ```bash
-kubectl get application -n argocd todo-app-gitops
+kubectl get application -n argocd todo-app-staging
+kubectl get application -n argocd todo-app-production
 ```

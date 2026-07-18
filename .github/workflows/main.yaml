@@ -74,9 +74,8 @@ jobs:
 
       - name: Update Manifests and Commit
         run: |
-          cd the_project/manifests
+          cd the_project/manifests/base
 
-          kustomize edit set namespace $NAMESPACE
           kustomize edit set image todo-backend=$BACKEND_IMAGE
           kustomize edit set image todo-frontend=$FRONTEND_IMAGE
           kustomize edit set image todo-broadcaster=$BROADCASTER_IMAGE
@@ -85,5 +84,5 @@ jobs:
           git config --local user.name "GitHub Action"
 
           git add kustomization.yaml
-          git commit -m "chore: update image tags to $GITHUB_SHA [skip ci]"
+          git commit -m "chore: update base image tags to $GITHUB_SHA [skip ci]"
           git push origin $GITHUB_REF_NAME
