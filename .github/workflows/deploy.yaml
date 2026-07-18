@@ -11,6 +11,8 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+        with:
+          ref: main
 
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
@@ -42,3 +44,4 @@ jobs:
         with:
           add: 'log_output/manifests/kustomization.yaml'
           message: "GitOps: Bump log-output image version tags to ${{ github.sha }}"
+          push: 'origin main --force'
