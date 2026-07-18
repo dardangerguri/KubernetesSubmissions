@@ -58,6 +58,7 @@
 - [4.5.](https://github.com/dardangerguri/KubernetesSubmissions/tree/4.5)
 - [4.6.](https://github.com/dardangerguri/KubernetesSubmissions/tree/4.6)
 - [4.7.](https://github.com/dardangerguri/KubernetesSubmissions/tree/4.7)
+- [4.8.](https://github.com/dardangerguri/KubernetesSubmissions/tree/4.8)
 
 ## Exercise 3.9: DBaaS vs DIY Database Comparison
 
