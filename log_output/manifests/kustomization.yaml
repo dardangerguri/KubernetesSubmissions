@@ -2,14 +2,14 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 resources:
-  - configmap.yaml
-  - deployment.yaml
-  - service.yaml
+- configmap.yaml
+- deployment.yaml
+- service.yaml
 
 images:
 - name: LOG_READER_IMAGE
   newName: dardangerguri/log-reader
-  newTag: 0a30c0cfcddfb72c0eb171f188fbc064a5821cd9
+  newTag: 189125ce65b07a78da42b72db0212bdc4aa14e4f
 - name: LOG_WRITER_IMAGE
   newName: dardangerguri/log-writer
-  newTag: 0a30c0cfcddfb72c0eb171f188fbc064a5821cd9
+  newTag: 189125ce65b07a78da42b72db0212bdc4aa14e4f
