@@ -7,7 +7,7 @@ on:
       - '*'
 
 permissions:
-  contents: read
+  contents: write
   id-token: write
 
 env:
@@ -22,7 +22,7 @@ jobs:
     name: Build, Publish and Deploy
     runs-on: ubuntu-latest
     permissions:
-      contents: 'read'
+      contents: 'write'
       id-token: 'write'
 
     steps:
@@ -39,13 +39,6 @@ jobs:
 
       - name: 'Configure Docker Registry'
         run: gcloud --quiet auth configure-docker $REGISTRY
-
-      - name: 'Get GKE credentials'
-        uses: 'google-github-actions/get-gke-credentials@v3'
-        with:
-          cluster_name: '${{ env.GKE_CLUSTER }}'
-          project_id: '${{ env.PROJECT_ID }}'
-          location: '${{ env.GKE_ZONE }}'
 
       - name: 'Form image names'
         run: |
@@ -79,22 +72,17 @@ jobs:
       - name: Set up Kustomize
         uses: imranismail/setup-kustomize@v3
 
-      - name: Deploy
+      - name: Update Manifests and Commit
         run: |
           cd the_project/manifests
 
-          kustomize edit set namespace project
+          kustomize edit set image europe-north1-docker.pkg.dev/${{ secrets.GKE_PROJECT }}/gke-apps-repo/todo-backend=$BACKEND_IMAGE
+          kustomize edit set image europe-north1-docker.pkg.dev/${{ secrets.GKE_PROJECT }}/gke-apps-repo/todo-frontend=$FRONTEND_IMAGE
+          kustomize edit set image europe-north1-docker.pkg.dev/${{ secrets.GKE_PROJECT }}/gke-apps-repo/todo-broadcaster=$BROADCASTER_IMAGE
 
-          kubectl create namespace $NAMESPACE --dry-run=client -o yaml | kubectl apply -f -
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
 
-          kustomize edit set namespace $NAMESPACE
-          kustomize edit set image todo-backend=$BACKEND_IMAGE
-          kustomize edit set image todo-frontend=$FRONTEND_IMAGE
-          kustomize edit set image todo-broadcaster=$BROADCASTER_IMAGE
-
-          kustomize build . | kubectl apply -f -
-
-          kubectl rollout status deployment/todo-backend-dep -n $NAMESPACE
-          kubectl rollout status deployment/todo-app-dep -n $NAMESPACE
-          kubectl get services -o wide -n $NAMESPACE
-          kubectl rollout status deployment/todo-broadcaster-dep -n $NAMESPACE
+          git add kustomization.yaml
+          git commit -m "chore: update image tags to $GITHUB_SHA [skip ci]"
+          git push origin $GITHUB_REF_NAME

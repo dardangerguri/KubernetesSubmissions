@@ -157,3 +157,17 @@ kubectl get pods -l app=todo-broadcaster -n project
 
 kubectl logs -l app=todo-broadcaster -n project --tail=20 -f
 ```
+
+## GitOps Deployment
+
+This project uses **Argo CD** for GitOps-based continuous deployment.
+
+- **Target Namespace:** `project`
+- **Sync Behavior:** Automatically tracks changes pushed to the `main` branch.
+- **Application Directory:** `the_project/manifests`
+
+### Manual Verification
+To check the status of the GitOps synchronization directly from the cluster:
+```bash
+kubectl get application -n argocd todo-app-gitops
+```
