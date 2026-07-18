@@ -76,9 +76,10 @@ jobs:
         run: |
           cd the_project/manifests
 
-          kustomize edit set image europe-north1-docker.pkg.dev/${{ secrets.GKE_PROJECT }}/gke-apps-repo/todo-backend=$BACKEND_IMAGE
-          kustomize edit set image europe-north1-docker.pkg.dev/${{ secrets.GKE_PROJECT }}/gke-apps-repo/todo-frontend=$FRONTEND_IMAGE
-          kustomize edit set image europe-north1-docker.pkg.dev/${{ secrets.GKE_PROJECT }}/gke-apps-repo/todo-broadcaster=$BROADCASTER_IMAGE
+          kustomize edit set namespace $NAMESPACE
+          kustomize edit set image todo-backend=$BACKEND_IMAGE
+          kustomize edit set image todo-frontend=$FRONTEND_IMAGE
+          kustomize edit set image todo-broadcaster=$BROADCASTER_IMAGE
 
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"

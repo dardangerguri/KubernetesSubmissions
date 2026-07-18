@@ -1,19 +1,19 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
-  - backend_deployment.yaml
-  - backend_service.yaml
-  - cronjob.yaml
-  - db_config.yaml
-  - frontend_deployment.yaml
-  - frontend_service.yaml
-  - ingress.yaml
-  - persistentvolumeclaim.yaml
-  - postgres_service.yaml
-  - postgres_statefulset.yaml
-  - db_backup_cronjob.yaml
-  - nats.yaml
-  - broadcaster_deployment.yaml
+- backend_deployment.yaml
+- backend_service.yaml
+- cronjob.yaml
+- db_config.yaml
+- frontend_deployment.yaml
+- frontend_service.yaml
+- ingress.yaml
+- persistentvolumeclaim.yaml
+- postgres_service.yaml
+- postgres_statefulset.yaml
+- db_backup_cronjob.yaml
+- nats.yaml
+- broadcaster_deployment.yaml
 images:
   - name: todo-backend
     newName: europe-north1-docker.pkg.dev/project-8802feef-4699-43fe-ad8/gke-apps-repo/todo-backend
@@ -21,3 +21,4 @@ images:
     newName: europe-north1-docker.pkg.dev/project-8802feef-4699-43fe-ad8/gke-apps-repo/todo-frontend
   - name: todo-broadcaster
     newName: europe-north1-docker.pkg.dev/project-8802feef-4699-43fe-ad8/gke-apps-repo/todo-broadcaster
+    newTag: 8a7f25cbcdcccdae53489bb0ed3a8c4a304ac3c6
