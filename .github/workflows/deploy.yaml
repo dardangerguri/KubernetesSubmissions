@@ -1,0 +1,44 @@
+name: Build and Deploy Log Output App (GitOps)
+
+on:
+  push:
+    paths:
+      - 'log_output/**'
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and Push Writer Image
+        run: |
+          docker build -t "dardangerguri/log-writer:${{ github.sha }}" -f log_output/writer/Dockerfile log_output
+          docker push "dardangerguri/log-writer:${{ github.sha }}"
+
+      - name: Build and Push Reader Image
+        run: |
+          docker build -t "dardangerguri/log-reader:${{ github.sha }}" -f log_output/reader/Dockerfile log_output
+          docker push "dardangerguri/log-reader:${{ github.sha }}"
+
+      - name: Set up Kustomize
+        uses: imranismail/setup-kustomize@v3
+
+      - name: Update Kustomization Images
+        run: |
+          cd log_output/manifests
+          kustomize edit set image LOG_WRITER_IMAGE=dardangerguri/log-writer:${{ github.sha }}
+          kustomize edit set image LOG_READER_IMAGE=dardangerguri/log-reader:${{ github.sha }}
+
+      - name: Commit and Push Manifest Changes
+        uses: EndBug/add-and-commit@v9
+        with:
+          add: 'log_output/manifests/kustomization.yaml'
+          message: "GitOps: Bump log-output image version tags to ${{ github.sha }}"

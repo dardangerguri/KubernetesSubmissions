@@ -1,0 +1,15 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - manifests/configmap.yaml
+  - manifests/deployment.yaml
+  - manifests/service.yaml
+
+images:
+  - name: LOG_WRITER_IMAGE
+    newName: dardangerguri/log-writer
+    newTag: "1.0"
+  - name: LOG_READER_IMAGE
+    newName: dardangerguri/log-reader
+    newTag: "1.1"

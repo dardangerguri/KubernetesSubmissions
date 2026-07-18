@@ -31,29 +31,23 @@ kubectl apply -f manifests/configmap.yaml
 kubectl rollout restart deployment log-output-dep -n exercises
 ```
 
-## Build and Push to Cluster
+## GitOps & Automated Deployment Pipeline
 
-#### Build Docker images for GKE (amd64)
-```bash
-docker build --platform linux/amd64 -t dardangerguri/log-writer:1.0-amd64 -f log_output/writer/Dockerfile log_output/
-docker build --platform linux/amd64 -t dardangerguri/log-reader:1.0-amd64 -f log_output/reader/Dockerfile log_output/
-```
+This application is fully managed using a declarative GitOps model driven by **ArgoCD** and **Kustomize**. Manual builds and explicit `kubectl apply` commands are no longer required to deploy updates.
 
-#### Push to Docker Hub
-```bash
-docker push dardangerguri/log-writer:1.0-amd64
-docker push dardangerguri/log-reader:1.0-amd64
-```
+### The Pipeline Architecture
 
-## Run in Kubernetes
-```bash
-kubectl apply -f manifests/
-```
-
-Now you can test it:
-```bash
-curl http://136.68.44.240/
-```
+1. **Code Modification**: A developer pushes updates to application logic or Kubernetes configuration files.
+2. **CI/CD Automation (GitHub Actions)**:
+   - Triggers automatically on file modifications inside `log_output/`.
+   - Compiles Go binaries and builds secure, cross-platform container images.
+   - Pushes images to Docker Hub, tagged uniquely using the modern git execution state `${{ github.sha }}`.
+   - Executes `kustomize edit set image` to programmatically overwrite targets within `manifests/kustomization.yaml`.
+   - Commits and pushes the modified configuration back into the active tracking repository branch.
+3. **Continuous Convergence (ArgoCD)**:
+   - Monitors the state specified in the repository.
+   - Detects drift or state modifications automatically.
+   - Directs the internal cluster resources to sync and securely pull matching images without exposed ingress cluster ports.
 
 ## Namespace Separation
 This application is deployed inside the isolated `exercises` namespace.
