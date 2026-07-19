@@ -9,7 +9,7 @@ resources:
 images:
 - name: LOG_READER_IMAGE
   newName: dardangerguri/log-reader
-  newTag: 722288e4fc5932850655ea148cfe97cbeae78df0
+  newTag: dd9596e4dc0bde216e3e47a30352258f1d47acb5
 - name: LOG_WRITER_IMAGE
   newName: dardangerguri/log-writer
-  newTag: 722288e4fc5932850655ea148cfe97cbeae78df0
+  newTag: dd9596e4dc0bde216e3e47a30352258f1d47acb5
