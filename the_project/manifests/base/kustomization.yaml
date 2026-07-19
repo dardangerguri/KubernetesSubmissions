@@ -19,10 +19,10 @@ resources:
 images:
 - name: todo-backend
   newName: europe-north1-docker.pkg.dev/project-8802feef-4699-43fe-ad8/gke-apps-repo/todo-backend
-  newTag: 722288e4fc5932850655ea148cfe97cbeae78df0
+  newTag: 770abb428d39278fbcfb4233728834bfc708602a
 - name: todo-broadcaster
   newName: europe-north1-docker.pkg.dev/project-8802feef-4699-43fe-ad8/gke-apps-repo/todo-broadcaster
-  newTag: 722288e4fc5932850655ea148cfe97cbeae78df0
+  newTag: 770abb428d39278fbcfb4233728834bfc708602a
 - name: todo-frontend
   newName: europe-north1-docker.pkg.dev/project-8802feef-4699-43fe-ad8/gke-apps-repo/todo-frontend
-  newTag: 722288e4fc5932850655ea148cfe97cbeae78df0
+  newTag: 770abb428d39278fbcfb4233728834bfc708602a
