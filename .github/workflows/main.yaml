@@ -68,21 +68,3 @@ jobs:
         run: |
           docker build --tag $BROADCASTER_IMAGE ./the_project/broadcaster
           docker push $BROADCASTER_IMAGE
-
-      - name: Set up Kustomize
-        uses: imranismail/setup-kustomize@v3
-
-      - name: Update Manifests and Commit
-        run: |
-          cd the_project/manifests/base
-
-          kustomize edit set image todo-backend=$BACKEND_IMAGE
-          kustomize edit set image todo-frontend=$FRONTEND_IMAGE
-          kustomize edit set image todo-broadcaster=$BROADCASTER_IMAGE
-
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-
-          git add kustomization.yaml
-          git commit -m "chore: update base image tags to $GITHUB_SHA [skip ci]"
-          git push origin $GITHUB_REF_NAME
