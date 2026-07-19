@@ -2,24 +2,27 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 resources:
-  - backend_deployment.yaml
-  - backend_service.yaml
-  - broadcaster_deployment.yaml
-  - cronjob.yaml
-  - db_backup_cronjob.yaml
-  - db_config.yaml
-  - frontend_deployment.yaml
-  - frontend_service.yaml
-  - ingress.yaml
-  - nats.yaml
-  - persistentvolumeclaim.yaml
-  - postgres_service.yaml
-  - postgres_statefulset.yaml
+- backend_deployment.yaml
+- backend_service.yaml
+- broadcaster_deployment.yaml
+- cronjob.yaml
+- db_backup_cronjob.yaml
+- db_config.yaml
+- frontend_deployment.yaml
+- frontend_service.yaml
+- ingress.yaml
+- nats.yaml
+- persistentvolumeclaim.yaml
+- postgres_service.yaml
+- postgres_statefulset.yaml
 
 images:
-  - name: todo-backend
-    newName: europe-north1-docker.pkg.dev/project-8802feef-4699-43fe-ad8/gke-apps-repo/todo-backend
-  - name: todo-frontend
-    newName: europe-north1-docker.pkg.dev/project-8802feef-4699-43fe-ad8/gke-apps-repo/todo-frontend
-  - name: todo-broadcaster
-    newName: europe-north1-docker.pkg.dev/project-8802feef-4699-43fe-ad8/gke-apps-repo/todo-broadcaster
+- name: todo-backend
+  newName: europe-north1-docker.pkg.dev/project-8802feef-4699-43fe-ad8/gke-apps-repo/todo-backend
+  newTag: 722288e4fc5932850655ea148cfe97cbeae78df0
+- name: todo-broadcaster
+  newName: europe-north1-docker.pkg.dev/project-8802feef-4699-43fe-ad8/gke-apps-repo/todo-broadcaster
+  newTag: 722288e4fc5932850655ea148cfe97cbeae78df0
+- name: todo-frontend
+  newName: europe-north1-docker.pkg.dev/project-8802feef-4699-43fe-ad8/gke-apps-repo/todo-frontend
+  newTag: 722288e4fc5932850655ea148cfe97cbeae78df0
