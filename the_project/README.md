@@ -46,6 +46,8 @@ docker build -t todo-backend:1.0 ./backend
 ```
 
 ## Run in Kubernetes (GKE with GitHub Actions & Kustomize)
+> ⚠️ **GitOps Architecture Update (Exercise 4.10):** > To separate application source code from structural deployment manifests, all Kubernetes resource definitions and Kustomize environment overlays (`/the_project/manifests`) have been migrated to a dedicated configuration repository: [todo-app-gitops-config](https://github.com/dardangerguri/todo-app-gitops-config).
+
 This project uses **GitHub Actions** for automated CI/CD. Every push builds the backend, frontend, and broadcaster Docker images, pushes them to **Google Artifact Registry**, and updates the base Kustomize specifications.
 
 The infrastructure automatically reconciles across isolated environments using **Argo CD** based on the following Git triggers:
@@ -166,6 +168,8 @@ kubectl logs -l app=todo-broadcaster -n production --tail=20 -f
 ```
 
 ## GitOps Deployment
+> ⚠️ **GitOps Architecture Update (Exercise 4.10):** > To separate application source code from structural deployment manifests, all Kubernetes resource definitions and Kustomize environment overlays (`/the_project/manifests`) have been migrated to a dedicated configuration repository: [todo-app-gitops-config](https://github.com/dardangerguri/todo-app-gitops-config).
+
 This project uses **Argo CD** for automated GitOps continuous state synchronization.
 
 - **Staging Monitor:** Tracks changes pushed directly to the `main` branch.
